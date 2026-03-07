@@ -3,7 +3,6 @@ const User    = require('../models/User');
 const Message = require('../models/Message');
 
 module.exports = (io) => {
-  // JWT проверка при подключении
   io.use(async (socket, next) => {
     try {
       const token = socket.handshake.auth?.token;
@@ -18,12 +17,11 @@ module.exports = (io) => {
   });
 
   io.on('connection', (socket) => {
-    console.log(`🔌 ${socket.user.username} connected`);
+    console.log(`${socket.user.username} connected`);
 
     User.findByIdAndUpdate(socket.user._id, { status: 'online' }).exec();
     socket.broadcast.emit('user:status', { userId: socket.user._id, status: 'online' });
 
-    // Войти в канал
     socket.on('channel:join', (channelId) => {
       Array.from(socket.rooms)
         .filter(r => r !== socket.id)
@@ -31,7 +29,6 @@ module.exports = (io) => {
       socket.join(channelId);
     });
 
-    // Новое сообщение
     socket.on('message:send', async ({ channelId, text }) => {
       try {
         if (!channelId || !text?.trim()) return;
@@ -47,7 +44,6 @@ module.exports = (io) => {
       }
     });
 
-    // Печатает...
     socket.on('typing:start', ({ channelId }) => {
       socket.to(channelId).emit('typing:update', {
         userId: socket.user._id,

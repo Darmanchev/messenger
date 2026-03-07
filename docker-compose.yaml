@@ -3,13 +3,32 @@ version: '3.8'
 services:
   mongodb:
     image: mongo:7
-    container_name: messenger-mongo
     ports:
       - "27017:27017"
     volumes:
       - ./mongo_data:/data/db
-    environment:
-      MONGO_INITDB_DATABASE: messenger
+
+  server:
+    image: node:18
+    working_dir: /app
+    volumes:
+      - ./server:/app
+    ports:
+      - "5001:5001"
+    command: sh -c "npm install && npm run dev"
+    depends_on:
+      - mongodb
+
+  client:
+    image: node:18
+    working_dir: /app
+    volumes:
+      - ./client:/app
+    ports:
+      - "5173:5173"
+    command: sh -c "npm install && npm run dev -- --host"
+    depends_on:
+      - server
 
 volumes:
   mongo_data:

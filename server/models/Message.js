@@ -7,6 +7,5 @@ const messageSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 messageSchema.index({ channelId: 1, createdAt: -1 });
-messageSchema.index({ text: 'text' }); // для full-text поиска
-
+messageSchema.index({ text: 'text' }); 
 module.exports = mongoose.model('Message', messageSchema);
